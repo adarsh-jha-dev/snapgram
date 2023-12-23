@@ -517,3 +517,91 @@ export async function updateUser(user: IUpdateUser) {
     console.log(error);
   }
 }
+
+export async function deleteImage(user: IUpdateUser) {
+  // delete the file from appwrite storage
+  try {
+    const file = user?.imageUrl;
+    if (!file) {
+      throw Error;
+    }
+
+    const statusCode = await deleteFile(user?.imageId);
+    if (!statusCode) {
+      throw Error;
+    }
+
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      user.userId,
+      {
+        imageUrl: null,
+        imageId: null,
+      }
+    );
+
+    if (!updatedUser) {
+      throw Error;
+    }
+
+    return updateUser;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function followAUser({
+  user,
+  userId,
+  followers,
+  followings,
+}: {
+  user: string;
+  userId: string;
+  followers: string[];
+  followings: string[];
+}) {
+  try {
+    const toBeFollowed = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("$id", userId)]
+    );
+
+    const userRequesting = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("$id", user)]
+    );
+
+    if (!toBeFollowed || !userRequesting) {
+      throw Error;
+    }
+
+    const followedUser = toBeFollowed.documents[0];
+    const requestingUser = userRequesting.documents[0];
+
+    const updatedFollowers = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      followedUser.$id,
+      {
+        followers: followers,
+      }
+    );
+
+    const updatedFollowing = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      requestingUser.$id,
+      {
+        followings: followings,
+      }
+    );
+
+    return { updatedFollowing };
+  } catch (error) {
+    console.log(error);
+  }
+}
