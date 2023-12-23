@@ -10,7 +10,6 @@ import {
   deleteImage,
   deletePost,
   deleteSavedPost,
-  followAUser,
   getCurrentUser,
   getInfinitePosts,
   getPostById,
@@ -26,7 +25,7 @@ import {
   updatePost,
   updateUser,
 } from "../appwrite/api";
-import { INewPost, INewUser, IUpdatePost, IUpdateUser, IUser } from "@/types";
+import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
 export const useCreateUserAccount = () => {
@@ -233,42 +232,14 @@ export const useUpdateUser = () => {
   });
 };
 
-export const useDeleteImage = () => {
+export const useDeleteImage = (user: IUpdateUser) => {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async (user: IUpdateUser | undefined) => {
-      if (!user) {
-        throw new Error("User not found");
-      }
-      return deleteImage(user);
-    },
+    mutationFn: () => deleteImage(user),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_CURRENT_USER],
       });
-    },
-  });
-};
-
-// handle follow a user
-export const useFollowUser = () => {
-  return useMutation({
-    mutationFn: ({
-      requestedUser,
-      followedUser,
-    }: {
-      requestedUser: IUser;
-      followedUser: IUser;
-    }) =>
-      followAUser({
-        user: requestedUser.id,
-        userId: followedUser.id,
-        followers: requestedUser.followers,
-        followings: requestedUser.followings,
-      }),
-    onSuccess: (data) => {
-      return data;
     },
   });
 };

@@ -34,7 +34,7 @@ const SignInForm = () => {
   });
 
   // Queries
-  const { mutateAsync: signInAccount, isPending } = useSignInAccount();
+  const { mutateAsync: signInAccount } = useSignInAccount();
 
   // Handler
   async function onSubmit(values: z.infer<typeof SignInValidation>) {
