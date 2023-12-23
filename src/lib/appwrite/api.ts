@@ -600,7 +600,7 @@ export async function followAUser({
       }
     );
 
-    return { updatedFollowing };
+    return { updatedFollowing, updatedFollowers };
   } catch (error) {
     console.log(error);
   }
